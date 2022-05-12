@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Práctica 3 grupo 15</title>
+</head>
+<body>
+    <h1>Reproductor de vídeo en Streaming del grupo 15</h1>
+    <video class="dashjs-player" autoplay controls preload="auto"> <source src="
+        https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd" type="application/dash+xml"/>
+    </video>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.7/dash.all.min.js"></script>
+<script>
+var player;
+document.addEventListener("DOMContentLoaded", function () {
+    init(); 
+});
+function init(){
+    player = dashjs.MediaPlayerFactory.create(    document.querySelector(".dashjs-player"));
+ };
+</script>
+</html>
