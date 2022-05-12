@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Práctica 3 grupo 15</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.1.1/dash.all.min.js"></script>
+    <script src="https://reference.dashif.org/dash.js/latest/dist/dash.all.debug.js"></script>
+
+</head>
+
+<body>
+    <h1>Reproductor de vídeo en Streaming del grupo 15</h1>
+    <div class="code">
+        <video class="dashjs-player" autoplay controls preload="auto" muted width="640px" height="360px">
+        </video>
+    </div>
+    <div class="code">
+        <p>Video Bitrate: <span id="bitrate"></span></p>
+        <p>Video Buffer: <span id="buffer"></span></p>
+        <p>Video Representation: <span id="representation"></span></p>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            init();
+        });
+        function init() {
+            const protData = {
+                "org.w3.clearkey": {
+                    "clearkeys": {
+                        "oW5AK5BW43HzbTSKpiu3SQ": "hyN9IKGfWKdAwFaE5pm0qg"
+                    }
+                }
+            };
+            var video,
+                player,
+                mpd_url = "./output/stream.mpd";
+            video = document.querySelector("video");
+            player = dashjs.MediaPlayer().create();
+            player.setProtectionData(protData);
+            player.initialize(video, mpd_url, true);
+            player.on(dashjs.MediaPlayer.events["PLAYBACK_ENDED"], function () {
+                clearInterval(eventPoller);
+            });
+            var eventPoller = setInterval(function () {
+                var streamInfo = player.getActiveStream().getStreamInfo();
+                var dashMetrics = player.getDashMetrics();
+                var dashAdapter = player.getDashAdapter();
+                if (dashMetrics && streamInfo) {
+                    const periodIdx = streamInfo.index;
+                    var repSwitch = dashMetrics.getCurrentRepresentationSwitch('video', true);
+                    var bufferLevel = dashMetrics.getCurrentBufferLevel('video', true);
+                    var bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : NaN;
+                    bufferlevel_aux = bufferLevel;
+                    bitrate_aux = bitrate;
+                    document.getElementById('buffer').innerText = bufferLevel + " secs";
+                    document.getElementById('bitrate').innerText = bitrate + " Kbps";
+                    document.getElementById('representation').innerText = repSwitch.to;
+                }
+
+            }, 500);
+        }
+    </script>
+    <script>
+
+        function current_time() {
+            var d = new Date();
+            return (
+                d.getHours() +
+                ":" +
+                (d.getMinutes() < 10 ? "0" : "") +
+                d.getMinutes() +
+                "," +
+                (d.getSeconds() < 10 ? "0" : "") +
+                d.getSeconds()
+            );
+        }
+
+        function addData(chart, label, new_buffer, new_bitrate) {
+            chart.data.labels.push(label);
+            chart.data.datasets[1].data.push(new_buffer);
+            chart.data.datasets[0].data.push(new_bitrate);
+            chart.update();
+        }
+
+    </script>
+</body>
+
+
+</html>
